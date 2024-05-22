@@ -5,7 +5,8 @@ with contextlib.redirect_stdout(None):
 import numpy as np
 
 import cv2
-from scripts.core_funcs import vec
+
+from scripts.core_funcs import vec, gen_colour
 
     ##############################################################################################
     
@@ -22,23 +23,19 @@ kernel = np.ones((5, 5), np.uint8) #honestly no idea what this is but it was in 
 
 class Camera:
     def __init__(self):
+        #online url using this app on my phone called droidcam
         self.url = f"http://{'IP not doxxing myself lmao'}/video"
         self.cap = cv2.VideoCapture(self.url)
         self.surf = None
 
         self.tip_pos = (0, 0) #position of the pencil knob | dynamic
-        self.radius = 20 # the radius or size of the knob  | dynamic
+        self.radius = 20 # the radius or size of the knob  | dynamic 
+        self.tip_col = gen_colour()
 
     #if the camera is on or not
     @property
     def recording(self) -> bool:
         return self.cap.isOpened()
-    
-    #whether or not the pencil should be drawing rn
-    #might change this to some sort of depth calculation, e.g. if the circle radius < 10
-    @property
-    def drawing(self) -> bool:
-        return pygame.key.get_pressed()[pygame.K_SPACE]
     
     def update(self):
         ret, frame = self.cap.read() #actual camera footage
@@ -63,7 +60,14 @@ class Camera:
             if radius > 5:
                 pygame.draw.circle(surf, (0, 255, 0), (int(x), int(y)), int(radius), 2)
 
+            #updating brush position and radius
             self.tip_pos = (x, y)
             self.radius = radius
 
-        self.surf = pygame.transform.scale(surf, vec(surf.get_size())*0.5)
+        #updating the camera
+        self.surf = surf
+        self.surf = pygame.transform.scale(surf, vec(surf.get_size())*1.5)
+
+    #gonna make a threaded function that does the updating in its own thread, hopefully will increase the fps
+    def threaded_(self):
+        pass
