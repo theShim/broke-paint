@@ -10,6 +10,8 @@ import sys
 import time
 
 from scripts.camera import Camera
+from scripts.canvas import Canvas
+from scripts.core_funcs import gen_colour, roundline
 
     ##############################################################################################
 
@@ -22,31 +24,17 @@ pygame.display.set_caption("")
 
 #initalising pygame window
 flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN
-SIZE = WIDTH, HEIGHT = (1200, 768)
+SIZE = WIDTH, HEIGHT = (1400, 768)
 screen = pygame.display.set_mode(SIZE, flags, 16)
+screen.fill((20, 20, 20))
 clock = pygame.time.Clock()
 
     ##############################################################################################
 
-def roundline(srf, color, start, end, radius=1):
-    dx = end[0]-start[0]
-    dy = end[1]-start[1]
-    distance = max(abs(dx), abs(dy))
-    for i in range(int(distance)):
-        x = int( start[0]+float(i)/distance*dx)
-        y = int( start[1]+float(i)/distance*dy)
-        pygame.draw.circle(srf, color, (x, y), radius)
-
-def tip_to_screen_pos(tip_pos):
-    screen_x = (tip_pos[0] / 480) * WIDTH
-    screen_y = (tip_pos[1] / 640) * HEIGHT
-    return (screen_x, screen_y)
-
 last_pos = (0, 0)
 
-    ##############################################################################################
-
 cam = Camera()
+canvas = Canvas(cam)
 
     ##############################################################################################
 
@@ -62,20 +50,26 @@ while cam.recording and running:
             if event.key == pygame.K_q:
                 running = False
 
-    pos = tip_to_screen_pos(cam.tip_pos)
-    if cam.drawing:
-        pygame.draw.circle(screen, (255, 0, 255), pos, cam.radius)
-        roundline(screen, (255, 0, 255), pos, last_pos if last_pos != (0, 0) else pos, cam.radius)
-    last_pos = pos
-
         #################################################
+
+    screen.fill((30, 31, 34))
+    pygame.draw.rect(screen, (43, 45, 49), [1140, 0, 20, HEIGHT])
+    pygame.draw.rect(screen, (49, 51, 56), [0, 0, 1140, HEIGHT])
 
     result = cam.update()
     if result == "Nothing": running = False
 
         #################################################
 
+    canvas.draw()
+    screen.blit(canvas.surf, (0, 0))
     screen.blit(cam.surf, cam.surf.get_rect(topright=(WIDTH, 0)))
+
+    pos = canvas.tip_to_screen_pos(cam.tip_pos)
+    pygame.draw.circle(screen, (175, 31, 55), pos, cam.radius, 1)
+    roundline(screen, (175, 31, 55), pos, last_pos if last_pos != (0, 0) else pos, cam.radius, width=1)
+    cam.tip_col = gen_colour()
+    last_pos = pos
 
         #################################################
 
