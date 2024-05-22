@@ -66,7 +66,7 @@ class Camera:
 
         #updating the camera
         self.surf = surf
-        self.surf = pygame.transform.scale(surf, vec(surf.get_size())*1.5)
+        self.surf = pygame.transform.scale(surf, vec(surf.get_size())*0.5)
 
     #gonna make a threaded function that does the updating in its own thread, hopefully will increase the fps
     def threaded_(self):
